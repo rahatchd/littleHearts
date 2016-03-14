@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<meta name="3D_heart_app" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+		
+		<script src="js/jquery.js"></script>
+		<script src="js/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="stylesheets/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="stylesheets/bootstrap-3.3.6-dist/css/bootstrap.min.css"/>
+		<link rel="stylesheet" type="text/css" href="stylesheets/font-awesome-4.5.0/css/font-awesome.min.css"/>
+		<link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+
+		<link rel="shortcut icon" href="img/img-bc-childrens-logo.png"/>
+		<title>little_hearts</title>
+	</head>
+	<body>
+		
+		<!-- loading screen			-->
+		<div id="loading-screen">
+			<div id="content">
+				<h1><x><i class="fa fa-user-md"></i>&nbsp; little_hearts</x> <y style="color: #d29b00">is initializing</y>&nbsp;  <i class="fa fa-cog fa-spin"></i></h1>
+				<h4>This will only take a moment</h4>
+				<div class="progress">
+					<div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%; background-color: #949494;"></div>
+				</div>
+			</div>
+		</div>
+		<!-- end of loading screen	-->
+		
+		<!-- scripts			-->
+		<script src="js/Three.js"></script>
+		<script src="js/Detector.js"></script>
+		<script src="js/stats.min.js"></script>
+		<script src="js/STLLoader.js"></script>
+		
+		<script src="LabelMaker.js"></script>
+		<script src ="shaders/VertexShader.glsl" type="x-vertex/x-glsl" id="vertex"></script>
+		<script src="shaders/FragmentShader.glsl" type="x-fragment/x-glsl" id="fragment"></script>
+		<script src="Monitor.js"></script>
+		<script src="Controls.js"></script>
+		<script src="main.js"></script>
+		<!-- end of scripts		-->
+		
+		<div id="header">
+			<div class="row">
+				<div class="col-sm-6 col-sm-offset text-center" id="scroll-app">
+					<h2><x><i class="fa fa-user-md"></i>&nbsp; little_hearts</x> <y style="color: #d29b00; font-size: 0.5em">3D heart anatomy visualization app</y></h2>
+				</div>
+				<div class="col-sm-2 text-center" id="scroll-team">
+					<h3><span class="text-muted">Meet Our</span> <x>Team</x></h3>
+				</div>
+				<div class="col-sm-2 text-center" id="scroll-tutorial">
+					<h3><y style="color: #00577d">Features</y> <span class="text-muted">Tutorial</span></h3>
+				</div>
+				<div class="col-sm-2 text-center" id="scroll-contact">
+					<h3>Contact <span class="text-muted">Info</span></h3>
+				</div>
+			</div>
+		</div>
+
+		<div id="slides" class="carousel slide" data-ride="carousel">
+			<ol class="carousel-indicators">
+				<li data-target="#slides" data-slide-to="0" class="active"></li>
+				<li data-target="#slides" data-slide-to="1"></li>
+				<li data-target="#slides" data-slide-to="2"></li>
+			</ol>
+
+			<div class="carousel-inner" role="listbox">
+				<div class="item active">
+					<img src="img/img-bmo.jpg" style="float:left; width: 60%">
+					<img src="img/img-bmo-map.jpg" style="float:right; width: 40%">
+					<div class="carousel-caption">
+						<h2>News</h2>
+						<p>Support your favourites as the <strong style="color:#b92c28"><i class="fa fa-user-md"></i>&nbsp; little_hearts</strong> team takes part in the BMO run in April as part of BCCH's team <strong style="color:#b92c28">HeartAttack!</strong></p>
+					</div>
+				</div>
+				<div class="item">
+					<img src="img/img-doctor.jpg" style="float:left; width: 50%">
+					<img src="img/img-baby.jpg" style="float:right; width: 50%">
+					<div class="carousel-caption">
+						<h2>Mission</h2>
+						<p>We hope to educate our users about <strong style="color:#b92c28">heart anatomy</strong> and <strong style="color:#b92c28">congenital heart disease</strong> with 3D visuals.</p>
+					</div>
+				</div>
+				<div class="item">
+					<img src="img/img-hospital-map.png" style="float:left; width: 60%">
+					<img src="img/img-bc-children-hospital.jpg" style="float:right; width: 40%">
+					<div class="carousel-caption">
+						<h2>Visit</h2>
+						<p>Visit us at the BC Children's Hospital's <strong style="color:#b92c28">Heart Centre</strong>.</p>
+					</div>
+				</div>
+			</div>
+
+			<a class="left carousel-control" href="#slides" role="button" data-slide="prev">
+				<span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+				<span class="sr-only">Previous</span>
+			</a>
+			<a class="right carousel-control" href="#slides" role="button" data-slide="next">
+				<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+				<span class="sr-only">Previous</span>
+			</a>
+
+		</div>
+
+		<!-- main app				-->
+		<div id="app">
+			<div id="heart-bar">
+				<button type="button" class="btn btn-default" id="normal"><i class="fa fa-heart fa-fw" id="normal-icon"></i>&nbsp; Normal</button>
+				<button type="button" class="btn btn-default" id="defect"><i class="fa fa-folder fa-fw" id="defect-icon"></i>&nbsp; Defect</button>
+			</div>
+			
+			<!-- canvases for webGL	-->
+			<div id="parent-canvas">
+				<div id="container1"><div class="debug"></div></div>
+				<div id="container2"><div class="debug"></div></div>
+			</div>
+			<!-- end of canvases	-->
+			
+			<div id="panels">
+				<div id="abstract-panel" onmouseover="document.body.style.overflow='hidden';" onmouseout="document.body.style.overflow='auto';"></div>
+				
+				<div id="defects-panel" onmouseover="document.body.style.overflow='hidden';" onmouseout="document.body.style.overflow='auto';">
+					<div class="text">
+						<h2>Choose a defect</h2>
+						<p>Here you can select other defects to view.</p>
+						<table class="table table-hover table-responsive">
+							<thead>
+								<tr>
+									<th>Defect</th>
+									<th>Preview</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr id="asd">
+									<td>Atrial Septal Defect</td>
+									<td><img src="img/img-asd.png"></td>
+								</tr>
+								<tr id="vsd">
+									<td>Ventricular Septal Defect</td>
+									<td><img src="img/img-vsd.png"></td>
+								</tr>
+								<tr id="avsd">
+									<td>Atrioventricular Septal Defect</td>
+									<td><img src="img/img-avsd.png"></td>
+								</tr>
+								<tr id="pda">
+									<td>Patent Ductus Arteriosis</td>
+									<td><img src="img/img-pda.png"></td>
+								</tr>
+								<tr id="tof">
+									<td>Tetrology of Fallot</td>
+									<td><img src="img/img-tof.png"></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				
+			</div>
+
+			<!-- divs for displaying labels -->
+			<div id="label1"> </div>
+			<div id="label2"> </div>
+			<!-- end of labels				-->
+			
+			<!-- app controls		-->
+			<div class="btn-group btn-group-justified" role="group" aria-label="..." id="control-bar">
+				<button type="button" class="btn btn-default" id="info-btn"><i class="fa fa-file-text"></i>&nbsp; Info</button>
+				<button type="button" class="btn btn-default" id="label-btn"><i class="fa fa-tags"></i>&nbsp; Label</button>
+				<button type="button" class="btn btn-default" id="view-btn"><i class="fa fa-camera-retro"></i>&nbsp; View&nbsp; <i class="fa fa-caret-up"></i></button>
+				<button type="button" class="btn btn-default" id="reset-btn"><i class="fa fa-refresh"></i>&nbsp; Reset</button>
+				<button type="button" class="btn btn-default" id="grid-btn"><i class="fa fa-crosshairs"></i>&nbsp; Grid</button>
+				<button type="button" class="btn disabled" id="flow-btn"><i class="fa fa-tint"></i>&nbsp; Flow</button>
+				<button type="button" class="btn btn-default" id="stats-btn"><i class="fa fa-bar-chart"></i>&nbsp; Stats</button>
+			</div>
+
+			<!-- x-section menu 	-->
+			<div class="btn-group-vertical" role="group" aria-label="..." id="views">
+				<button type="button" class="btn btn-default" id="view-external">External</button>
+				<button type="button" class="btn btn-default" id="view-dorsal">Back</button>
+				<button type="button" class="btn btn-default" id="view-ventral">Front</button>
+				<button type="button" class="btn btn-default" id="view-bottom">Bottom</button>
+				<button type="button" class="btn btn-default" id="view-top">Top</button>
+				<button type="button" class="btn btn-default" id="view-left">Left</button>
+				<button type="button" class="btn btn-default" id="view-right">Right</button>
+			</div>
+			<!-- end of x-section	-->
+			<!-- end of controls	-->
+
+		</div>
+		<!-- end of main app		-->
+
+		<!-- meet our team			-->
+		<div id="meet-our-team" style="margin: 1em 0 3em 0">
+			<div class="row">
+				<div class="col-sm-8 col-sm-offset-2 text-center">
+					<h1><span class="text-muted">Meet the <x><i class="fa fa-user-md"></i>&nbsp; little_hearts</x> team</span></h1>
+				</div>
+			</div>
+			<hr class="featurette-divider short">
+			<div class="row" id="top-row" style="margin-top: 3em">
+				<div class="col-sm-4 text-center team" id="harris">
+					<img class="img-circle" src="img/img-harris.jpg" width="150" height="150">
+					<h2>Dr. Kevin Harris</h2>
+					<p style="color: #d29b00">Director of Research <x>BCCH</x></p>
+					<p class="description text-justify">
+						As an academic pediatric cardiologist, I am interested in optimizing outcomes for all children with cardiovascular disease.
+						<br><br>
+						<y style="color: #00577d">And I love <x>running</x>, but not as much as I love making other people <x>run</x>.</y>
+					</p>
+					<p><a class="btn btn-default" href="http://cfri.ca/our-research/researchers/results/Details/kevin-c-harris" target="_blank" role="button">View details</a></p>
+				</div>
+				<div class="col-sm-4 text-center team" id="sanatani">
+					<img class="img-circle" src="img/img-sanatani.jpg" width="150" height="150">
+					<h2>Dr. Shubhayan Sanatani</h2>
+					<p style="color: #d29b00">Division Head and Medical Director <x>BCCH</x></p>
+					<p class="description text-justify">
+						As a pediatric electrophysiologist, my research focuses on the rhythm of the heart.
+						<br><br>
+						<y style="color: #00577d">And I love <x>running</x>... farther than Dr. Harris.</y>
+					</p>
+					<p><a class="btn btn-default" href="http://cfri.ca/our-research/researchers/results/Details/shubhayan-sanatani" target="_blank" role="button">View details</a></p>
+				</div>
+				<div class="col-sm-4 text-center team" id="ens">
+					<img class="img-circle" src="img/img-ens.jpg" width="150" height="150">
+					<h2>Connie Ens</h2>
+					<p style="color: #d29b00">Nurse Clinician <x>BCCH</x></p>
+					<p class="description text-justify">
+						As a Nurse Clinician, I do many things, but essentially I strive to ensure the care and comfort of my patients.
+						<br><br>
+						<y style="color: #00577d">And I love to meditate about <x>running</x> during yoga.</y>
+					</p>
+					<p><a class="btn btn-default" href="#" target="_blank" role="button">View details</a></p>
+				</div>
+			</div>
+			<div class="row" id="bottom-row">
+				<div class="col-sm-4 col-sm-offset-2 text-center team" id="voss">
+					<img class="img-circle" src="img/img-voss.jpg" width="150" height="150">
+					<h2>Dr. Christine Voss</h2>
+					<p style="color: #d29b00">Research Associate <x>UBC</x></p>
+					<p class="description text-justify">
+						As a research associate, my main interests of research are physical fitness, physical activity and cardiovascular health in children and youth.
+						<br><br>
+						<y style="color: #00577d">And <x>running</x> and I are just friends.</y>
+					</p>
+					<p><a class="btn btn-default" href="https://www.linkedin.com/in/christine-voss-62831636" target="_blank" role="button">View details</a></p>
+				</div>
+				<div class="col-sm-4 text-center team" id="dhande">
+					<img class="img-circle" src="img/img-dhande.jpg" width="150" height="150">
+					<h2>Rahat Dhande</h2>
+					<p style="color: #d29b00">Application Developer <x>UBC Science Co-op</x></p>
+					<p class="description text-justify">
+						As an Engineering Physics student, I cherish bringing ideas to life through science and technology.
+						<br><br>
+						<y style="color: #00577d">And I love <x>running</x> to the gym in my car.</y>
+					</p>
+					<p><a class="btn btn-default" href="https://www.linkedin.com/in/rahat-dhande-297122105" target="_blank" role="button">View details</a></p>
+				</div>
+			</div>
+		</div>
+		<!--end of Meet Our Team		-->
+
+		<!-- features					-->
+		<div id="tutorial" style="background-color: #353535">
+			<div class="row features-toggle" data-toggle="collapse" data-target="#features">
+				<div class="col-sm-8 col-sm-offset-2 text-center">
+					<h1 style="color: #fff"><y style="color: #00577d">Features</y> Tutorial</h1>
+				</div>
+			</div>
+
+			<div id="features" class="collapse">
+				<hr class="featurette-divider short">
+				<div class="row featurette" id="features-controls">
+					<div class="row">
+						<div class="col-sm-4 col-sm-offset-1 text-left" style="color: #fff" >
+							<h2 class="featurette-heading" style="color: #d29b00">Movement Controls</h2>
+							<ul class="list-unstyled lead">
+								<li>Click and Drag to <strong style="color:#b92c28">rotate</strong></li>
+								<li>Pinch or Scroll to <strong style="color:#b92c28">zoom</strong></li>
+								<li>Click the Reset Button to <strong style="color:#b92c28">reset</strong> the model</li>
+							</ul>
+						</div>
+						<div class="col-sm-7">
+							<img src="img/gif-features-controls.gif" class="featurette-image img-responsive center-block" height="400" width="500">
+						</div>
+					</div>
+				</div>
+				<hr class="featurette-divider short">
+				<div class="row featurette" id="features-settings">
+					<div class="row">
+						<div class="col-sm-4 col-sm-push-7 text-right" style="color: #fff">
+							<h2 class="featurette-heading" style="color: #d29b00">View Settings</h2>
+							<ul class="list-unstyled lead">
+								<li>Click the Labels Button and hover over <strong style="color:#b92c28">Tags</strong> to display <strong style="color:#b92c28">labels</strong></li>
+								<li>Click the View Button and choose a view to display <strong style="color:#b92c28">cross-sections</strong></li>
+							</ul>
+						</div>
+						<div class="col-sm-6 col-sm-pull-3">
+							<img src="img/gif-features-settings.gif" class="featurette-image img-responsive center-block" height="400" width="500">
+						</div>
+					</div>
+				</div>
+				<hr class="featurette-divider short">
+				<div class="row featurette" id="features-models">
+					<div class="row">
+						<div class="col-sm-4 col-sm-offset-1 text-left" style="color: #fff">
+							<h2 class="featurette-heading" style="color: #d29b00">Models and Info</h2>
+							<ul class="list-unstyled lead">
+								<li>Click the Defective Heart Button to choose a new <strong style="color:#b92c28">model</strong></li>
+								<li>Click the Info Button to read more about the chosen <strong style="color:#b92c28">condition</strong></li>
+							</ul>
+						</div>
+						<div class="col-sm-7">
+							<img src="img/gif-features-models.gif" class="featurette-image img-responsive center-block" height="400" width="500">
+						</div>
+					</div>
+				</div>
+				<hr class="featurette-divider short">
+				<div class="row">
+					<div class="col-sm-2 col-sm-offset-5 text-center" style="padding-bottom: 1em">
+						<p class="features-toggle" data-toggle="collapse" data-target="#features"><i class="fa fa-times-circle-o fa-lg" style="color: #fff"></i></p>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- end of features		-->
+
+		<!-- footer						-->
+		<div id="contact">
+			<div class="row">
+				<div class="col-sm-8 col-sm-offset-2 text-center">
+					<h1>Contact <span class="text-muted">Info</span></h1>
+				</div>
+			</div>
+			<hr class="featurette-divider short">
+			<div class="row" id="footer">
+				<div class="col-sm-3 col-sm-offset-2" id="about-us">
+					<h3><i class="fa fa-info-circle" style="color:#00577d"></i>&nbsp; about us</h3>
+					<p>
+						Our mission is to educate users about heart anatomy and congenital heart disease
+						through the use of 3D visuals.
+					</p>
+					<ul class="list-unstyled">
+						<li><a href="http://cfri.ca/our-research/researchers/results/Details/kevin-c-harris" target="_blank">Dr. Harris' lab team</a></li>
+						<li><a href="http://www.bcchildrens.ca/our-services/clinics/childrens-heart-centre" target="_blank">Heart Centre team</a></li>
+					</ul>
+				</div>
+				<div class="col-sm-3" id="help">
+					<h3><i class="fa fa-question-circle" style="color:#42005d"></i>&nbsp; help</h3>
+					<p>
+						First time using the app?
+						<br>
+						Click the <strong><y style="color: #00577d">Features</y> Tutorial</strong> button above to learn how to use <x><i class="fa fa-user-md"></i>&nbsp; little_hearts</x>.
+					</p>
+					<h3><i class="fa fa-bug" style="color:#005d19"></i>&nbsp; bug</h3>
+					<p>Encountered a bug?  <a href="#">Click here</a> to report it.</p>
+				</div>
+				<div class="col-sm-3" id="navigation">
+					<h3><i class="fa fa-fighter-jet" style="color:#534b4f"></i>&nbsp; navigation</h3>
+					<p>External links</p>
+					<ul class="list-unstyled">
+						<li><a href="http://www.bcchildrens.ca/" target="_blank">Heart Centre</a></li>
+						<li><a href="http://www.bcchildrens.ca/our-services/clinics/childrens-heart-centre" target="_blank">BC Children's Hospital</a></li>
+						<li><a href="http://www.cfri.ca/" target="_blank">CFRI</a></li>
+					</ul>
+				</div>
+			</div>
+			<hr class="featurette-divider short">
+			<div class="row">
+				<div class="col-sm-8 col-sm-offset-2 text-center" id="follow">
+					<h1><x>follow</x> <span class="text-muted">us on</span> </h1>
+					<h3>
+						&nbsp; <a href="https://www.facebook.com/BCChildrens" target="_blank" id="facebook"><span class="fa-stack"><i class="fa fa-circle fa-stack-2x" id="c-facebook"></i><i class="fa fa-facebook fa-stack-1x fa-inverse"></i></span></a>
+						&nbsp; <a href="https://twitter.com/BCCHF" target="_blank" id="twitter"><span class="fa-stack"><i class="fa fa-circle fa-stack-2x" id="c-twitter"></i><i class="fa fa-twitter fa-stack-1x fa-inverse"></i></span></a>
+						&nbsp; <a href="https://www.youtube.com/user/bcchf" target="_blank" id="youtube"><span class="fa-stack"><i class="fa fa-circle fa-stack-2x" id="c-youtube"></i><i class="fa fa-youtube-play fa-stack-1x fa-inverse"></i></span></a>
+						&nbsp; <a href="https://www.instagram.com/bcchf/" target="_blank" id="instagram"><span class="fa-stack"><i class="fa fa-circle fa-stack-2x" id="c-instagram"></i><i class="fa fa-instagram fa-stack-1x fa-inverse"></i></span></a>
+						&nbsp; <a href="#" target="_blank" id="google-plus"><span class="fa-stack"><i class="fa fa-circle fa-stack-2x" id="c-google-plus"></i><i class="fa fa-google-plus fa-stack-1x fa-inverse"></i></span></a>
+						&nbsp; <a href="https://www.linkedin.com/company/bc-children's-hospital-vancouver" target="_blank" id="linked-in"><span class="fa-stack"><i class="fa fa-circle fa-stack-2x" id="c-linked-in"></i><i class="fa fa-linkedin fa-stack-1x fa-inverse"></i></span></a>
+					</h3>
+				</div>
+			</div>
+			<hr class="featurette-divider short">
+		</div>
+		<!-- end of footer				-->
+
+		<!-- holders for chd info		-->
+		<div class="info" style="display:none">
+			<div id="info-asd">
+				<div class="text">
+					<h2 style="color:#b92c28">Atrial Septal Defect</h2>
+					<h4 style="color:#d29b00">[EY-tree-al SEP-tul]</h4>
+					<hr class="featurette-divider">
+					<h2>Problem</h2>
+					<p>
+						a hole between the top 2 chambers (atria) of the heart
+					</p>
+					<hr class="featurette-divider short">
+					<h2>Treatment</h2>
+					<ol type="a">
+						<li>very small holes often close during early childhood on their own</li>
+						<li>minimally invasive procedure done by guiding a small flexible tube through a
+								larger blood vessel) then placing a “plug” to block the hole</li>
+						<li>surgically (opening in the chest) sewing a patch of material over the hole</li>
+					</ol>
+					<hr class="featurette-divider short">
+					<h2>Timing</h2>
+					<p>usually done when child is over 3 or 4 years of age</p>
+					<br>
+				</div>
+			</div>
+			<div id="info-vsd">
+				<div class="text">
+					<h2 style="color:#b92c28">Ventricular Septal Defect</h2>
+					<h4 style="color:#d29b00">[ven-TRIK-yu-lar SEP-tul]</h4>
+					<hr class="featurette-divider">
+					<h2>Problem</h2>
+					<p>
+						a hole between the bottom 2 pumping chambers (ventricles) of the heart
+					</p>
+					<hr class="featurette-divider short">
+					<h2>Treatment</h2>
+					<ol type="a">
+						<li>small holes do not need to be closed as they do not cause any problems</li>
+						<li>medication to treat symptoms until surgery</li>
+						<li>surgically (opening in the chest) sewing a patch of material over the hole</li>
+					</ol>
+					<hr class="featurette-divider short">
+					<h2>Timing</h2>
+					<p>usually done when child is over 3 to 6 months of age</p>
+					<br>
+				</div>
+			</div>
+			<div id="info-avsd">
+				<div class="text">
+					<h2 style="color:#b92c28">Atrioventricular Septal Defect</h2>
+					<h4 style="color:#d29b00">[EY-tree-oh-ven-TRIC-u-lar SEP-tal ]</h4>
+					<hr class="featurette-divider">
+					<h2>Problem</h2>
+					<p>two main features:</p>
+					<ol type="a">
+						<li>a large hole in middle of heart involving all 4 chambers</li>
+						<li>“common” valve between the top and bottom of the heart</li>
+					</ol>
+					<hr class="featurette-divider short">
+					<h2>Treatment</h2>
+					<ol type="a">
+						<li>surgically (opening in the chest) sewing either one or two patches to close the
+							hole and dividing the one large valve to create two separate valves - the
+							tricuspid valve that controls the flow of blood from the top right chamber to the
+							bottom right and one (mitral valve) that does the same for the left side of the
+							heart</li>
+						<li>medication to treat symptoms until surgery</li>
+					</ol>
+					<hr class="featurette-divider short">
+					<h2>Timing</h2>
+					<p>depends on how severe the symptoms are, usually done in first year of life</p>
+					<br>
+				</div>
+			</div>
+			<div id="info-pda">
+				<div class="text">
+					<h2 style="color:#b92c28">Patent Ductus Arteriosis</h2>
+					<h4 style="color:#d29b00">[PAY-tent DUCK-tus ar-TEAR-ee-OH-sis]</h4>
+					<hr class="featurette-divider">
+					<h2>Problem</h2>
+					<p>a left over connection (duct) between the aorta (largest oxygen rich blood
+						vessel) and the pulmonary artery (largest oxygen poor blood vessel)</p>
+					<hr class="featurette-divider short">
+					<h2>Treatment</h2>
+					<ol type="a">
+						<li>small ducts can close on their own</li>
+						<li>medication may work for premature babies or newborns</li>
+						<li>minimally invasive procedure (Heart Catheterization) done by guiding a long thin
+							tube through a blood vessel in the leg; the connection can be closed by “coil” or
+							“device” which is like a plug</li>
+						<li>surgically (opening on the side, between the ribs) where the connection is closed
+							with a metal clip or it is tied off</li>
+					</ol>
+					<hr class="featurette-divider short">
+					<h2>Timing</h2>
+					<p>when signs and/or symptoms appear</p>
+					<br>
+				</div>
+			</div>
+			<div id="info-tof">
+				<div class="text">
+					<h2 style="color:#b92c28">Tetrology of Fallot</h2>
+					<h4 style="color:#d29b00">[te-tral-uh-jee of Fal-oh]</h4>
+					<hr class="featurette-divider">
+					<h2>Problem</h2>
+					<p>four features involved:</p>
+					<ol type="a">
+						<li>Ventricular Septal Defect – a hole between the bottom 2 chambers (ventricles)</li>
+						<li>Pulmonary Stenosis – a narrowing or blockage in the pulmonary artery that takes
+							oxygen poor blood from the right ventricle (lower chamber) to the lungs to get
+							oxygen</li>
+						<li>over riding Aorta – the opening of the aorta lies in the middle of the VSD, instead
+							of the left ventricle</li>
+						<li>thickened muscle of the right ventricle since it works harder to pump blood
+							through narrowing</li>
+					</ol>
+					<hr class="featurette-divider short">
+					<h2>Treatment</h2>
+					<ol type="a">
+						<li>medication to treat symptoms until surgery</li>
+						<li>surgery
+							<ol type="i">
+								<li>temporary operation to relieve symptoms if baby is very small and
+									symptoms are not managed by medication</li>
+								<li>complete repair (opening the chest) to patch the hole between the
+									ventricles and open up the blood vessel (Pulmonary artery) so blood can
+									be pumped easily out of the heart to the lungs</li>
+							</ol>
+						</li>
+					</ol>
+					<hr class="featurette-divider short">
+					<h2>Timing</h2>
+					<p>usually between 6 to 12 months of age</p>
+					<br>
+				</div>
+			</div>
+		</div>
+		<div id="titles" style="display: none">
+			<div id="title-asd"><i class="fa fa-folder fa-fw" id="defect-icon"></i>&nbsp; ASD</div>
+			<div id="title-vsd"><i class="fa fa-folder fa-fw" id="defect-icon"></i>&nbsp; VSD</div>
+			<div id="title-avsd"><i class="fa fa-folder fa-fw" id="defect-icon"></i>&nbsp; AVSD</div>
+			<div id="title-pda"><i class="fa fa-folder fa-fw" id="defect-icon"></i>&nbsp; PDA</div>
+			<div id="title-tof"><i class="fa fa-folder fa-fw" id="defect-icon"></i>&nbsp; TOF</div>
+		</div>
+		<!-- end of info				-->
+			
+	</body>
+</html>
