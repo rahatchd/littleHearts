@@ -241,6 +241,13 @@ x {
 	left: 10%;
 }
 
+#close-features {
+	transition: transform 1s;
+}
+#close-features:hover {
+	transform: rotate(180deg);
+}
+
 .features-toggle:hover {
 	cursor: pointer;
 }
@@ -263,10 +270,10 @@ x {
 #footer a:visited {
 	color: #000032;
 }
-
 #follow a:link {
 	color: #313131;
 }
+
 #facebook:hover #c-facebook, #facebook:visited #c-facebook {
 	color: #3b5998;
 }
