@@ -22,10 +22,13 @@ function init() {
 		rotationX: Math.PI/5,
 		rotationY: -Math.PI/5,
 		rotationZ: 0,
+		positionX: 0,
+		positionY: 0,
+		positionZ: 0,
 		labelID: "label1"
 	};
 	models.normal = normal;
-	
+
 	var atrialSeptal = {
 		pathToMesh: 'models/healthy-heart.stl',
 		color: 0x949494,
@@ -33,10 +36,13 @@ function init() {
 		rotationX: Math.PI/5,
 		rotationY: -Math.PI/5,
 		rotationZ: 0,
+		positionX: 0,
+		positionY: 0,
+		positionZ: 0,
 		labelID: "label2"
 	};
 	models.atrialSeptal = atrialSeptal;
-	
+
 	var ventricularSeptal = {
 		pathToMesh: 'models/healthy-heart.stl',
 		color: 0xd29b00,
@@ -44,6 +50,9 @@ function init() {
 		rotationX: Math.PI/5,
 		rotationY: -Math.PI/5,
 		rotationZ: 0,
+		positionX: 0,
+		positionY: 0,
+		positionZ: 0,
 		labelID: "label2"
 	};
 	models.ventricularSeptal = ventricularSeptal;
@@ -55,6 +64,9 @@ function init() {
 		rotationX: Math.PI/5,
 		rotationY: -Math.PI/5,
 		rotationZ: 0,
+		positionX: 0,
+		positionY: 0,
+		positionZ: 0,
 		labelID: "label2"
 	};
 	models.atrioventricularSeptal = atrioventricularSeptal;
@@ -66,6 +78,9 @@ function init() {
 		rotationX: Math.PI/5,
 		rotationY: -Math.PI/5,
 		rotationZ: 0,
+		positionX: 0,
+		positionY: 0,
+		positionZ: 0,
 		labelID: "label2"
 	};
 	models.patentDuctus = patentDuctus;
@@ -77,6 +92,9 @@ function init() {
 		rotationX: Math.PI/5,
 		rotationY: -Math.PI/5,
 		rotationZ: 0,
+		positionX: 0,
+		positionY: 0,
+		positionZ: 0,
 		labelID: "label2"
 	};
 	models.tetrology = tetrology;
@@ -116,7 +134,7 @@ function animate() {
 function loadingScreen() {
 	setTimeout( function() {
 		$('#loading-screen').fadeOut();
-	}, 3000 );
+	}, 3000);
 	
 	var value = 1;
 	var progress = setInterval( function() {
