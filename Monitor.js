@@ -20,6 +20,7 @@ function Monitor(containerID, heart) {
     var mouseDown = false;
     var touchDown = false;
     var pinch = false;
+    var pinchLength = 0;
     var deltaPinch = 0;
     var theta = 0, phi = 0;
     var deltaTheta = 0, deltaPhi = 0;
@@ -148,7 +149,7 @@ function Monitor(containerID, heart) {
         mouse.y = event.clientY;
     }
 
-    function pinchLength(e) {
+    function calcPinchLength(e) {
         var x = e.touches[0].clientX;
         var y = e.touches[0]. clientY;
         return Math.sqrt(x*x + y*y);
@@ -161,7 +162,7 @@ function Monitor(containerID, heart) {
 
         if (event.touches.length > 1) {
             pinch = true;
-            deltaPinch = pinchLength;
+            pinchLength = calcPinchLength(event);
         }
         else {
             pinch = false;
@@ -199,14 +200,14 @@ function Monitor(containerID, heart) {
         console.log(pinch);
 
         if (pinch || event.touches.length > 1) {
-            deltaPinch = pinchLength(event) - deltaPinch;
+            deltaPinch = calcPinchLength(event) - pinchLength;
 
             fov += deltaPinch;
             fov = Math.max(minFov, Math.min(maxFov, fov));
             console.log(fov);
             camera.fov = fov;
             camera.updateProjectionMatrix();
-            deltaPinch = pinchLength(event);
+            pinchLength = calcPinchLength(event);
         }
         else if (touchDown) {
             deltaTouch.x = event.touches[0].clientX - touch.x;
