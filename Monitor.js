@@ -19,6 +19,8 @@ function Monitor(containerID, heart) {
     var deltaTouch = new THREE.Vector2(0, 0);
     var mouseDown = false;
     var touchDown = false;
+    var touchPinch = false;
+    var deltaPinch = new THREE.Vector2(0, 0);
     var theta = 0, phi = 0;
     var deltaTheta = 0, deltaPhi = 0;
     var target = new THREE.Vector3(0, 0, 0);
@@ -148,14 +150,20 @@ function Monitor(containerID, heart) {
     function onTouchStart(event) {
         event.preventDefault();
         event.stopPropagation();
-        touchDown = true;
+        if (event.touches.length > 1) {
+            touchPinch = true;
+            deltaPinch.x = Math.abs(event.touches[1].clientX - event.touches[0].clientX);
+            deltaPinch.y = Math.abs(event.touches[1].clientY - event.touches[0].clientY);
+        }
+        else {
+            touchDown = true;
+            touch.x = event.touches[0].clientX;
+            touch.y = event.touches[0].clientY;
+        }
 
         parentCanvas.addEventListener('touchmove', onTouchMove, false);
         parentCanvas.addEventListener('touchend', onTouchEnd, false);
         parentCanvas.addEventListener('touchcancel', onTouchCancel, false);
-
-        touch.x = event.touches[0].clientX;
-        touch.y = event.touches[0].clientY;
     }
 
     function onMouseMove(event) {
@@ -191,6 +199,16 @@ function Monitor(containerID, heart) {
             theta -= deltaTheta * rotateSpeed.touch;
             phi += deltaPhi * rotateSpeed.touch;
             phi = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, phi));
+        }
+
+        if (touchPinch) {
+            deltaPinch.x = Math.abs(event.touches[1].clientX - event.touches[0].clientX);
+            deltaPinch.y = Math.abs(event.touches[1].clientY - event.touches[0].clientY);
+
+            fov += deltaPinch.length();
+            fov = Math.max(minFov, Math.min(maxFov, fov));
+            camera.fov = fov;
+            camera.updateProjectionMatrix();
         }
     }
 
