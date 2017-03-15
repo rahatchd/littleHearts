@@ -150,6 +150,8 @@ function Monitor(containerID, heart) {
     function onTouchStart(event) {
         event.preventDefault();
         event.stopPropagation();
+        console.log(event.touches.length);
+
         if (event.touches.length > 1) {
             touchPinch = true;
             deltaPinch.x = Math.abs(event.touches[1].clientX - event.touches[0].clientX);
@@ -186,7 +188,18 @@ function Monitor(containerID, heart) {
     function onTouchMove(event) {
         event.preventDefault();
         event.stopPropagation();
-        if (touchDown) {
+
+        if (touchPinch || event.touches.length > 1) {
+            deltaPinch.x = Math.abs(event.touches[1].clientX - event.touches[0].clientX);
+            deltaPinch.y = Math.abs(event.touches[1].clientY - event.touches[0].clientY);
+
+            fov += deltaPinch.length();
+            console.log(deltaPinch.length());
+            fov = Math.max(minFov, Math.min(maxFov, fov));
+            camera.fov = fov;
+            camera.updateProjectionMatrix();
+        }
+        else if (touchDown) {
             deltaTouch.x = event.touches[0].clientX - touch.x;
             deltaTouch.y = event.touches[0].clientY - touch.y;
 
@@ -199,16 +212,6 @@ function Monitor(containerID, heart) {
             theta -= deltaTheta * rotateSpeed.touch;
             phi += deltaPhi * rotateSpeed.touch;
             phi = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, phi));
-        }
-
-        if (touchPinch) {
-            deltaPinch.x = Math.abs(event.touches[1].clientX - event.touches[0].clientX);
-            deltaPinch.y = Math.abs(event.touches[1].clientY - event.touches[0].clientY);
-
-            fov += deltaPinch.length();
-            fov = Math.max(minFov, Math.min(maxFov, fov));
-            camera.fov = fov;
-            camera.updateProjectionMatrix();
         }
     }
 
