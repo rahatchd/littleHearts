@@ -204,13 +204,15 @@ function Monitor(containerID, heart) {
         event.preventDefault();
         event.stopPropagation();
 
+        console.log(pinch);
+
         if (pinch.yes || event.touches.length > 1) {
             deltaPinch.x = Math.abs(event.touches[1].clientX - event.touches[0].clientX);
             deltaPinch.y = Math.abs(event.touches[1].clientY - event.touches[0].clientY);
 
-            fov += pinch.shrink ? -deltaPinch.length() : deltaPinch.length();
-            console.log(fov);
+            fov += pinch.shrink ? (-deltaPinch.length() * pinchSpeed) : (deltaPinch.length() * pinchSpeed);
             fov = Math.max(minFov, Math.min(maxFov, fov));
+            console.log(fov);
             camera.fov = fov;
             camera.updateProjectionMatrix();
         }
