@@ -158,7 +158,6 @@ function Monitor(containerID, heart) {
     function onTouchStart(event) {
         event.preventDefault();
         event.stopPropagation();
-        console.log(event.touches.length);
 
         if (event.touches.length > 1) {
             pinch = true;
@@ -197,14 +196,13 @@ function Monitor(containerID, heart) {
         event.preventDefault();
         event.stopPropagation();
 
-        console.log(pinch);
-
         if (pinch || event.touches.length > 1) {
             deltaPinch = calcPinchLength(event) - pinchLength;
+            console.log("deltapinch: " + deltaPinch + ", pinchLength: " + pinchLength);
 
             fov += deltaPinch;
             fov = Math.max(minFov, Math.min(maxFov, fov));
-            console.log(fov);
+            console.log("fov: " + fov);
             camera.fov = fov;
             camera.updateProjectionMatrix();
             pinchLength = calcPinchLength(event);
