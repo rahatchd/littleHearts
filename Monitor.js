@@ -42,6 +42,7 @@ function Monitor(containerID, heart) {
      */
     var animationDamping = 0.1, tolerance = 0.000001;
     var rotateSpeed = {mouse: 3, touch: 1};
+    var pinchSpeed = 0.1;
 
     init();
 
