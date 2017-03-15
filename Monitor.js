@@ -14,8 +14,11 @@ function Monitor(containerID, heart) {
     var labels;
 
     var mouse = new THREE.Vector2(0, 0);
+    var touch = new THREE.Vector2(0, 0);
     var deltaMouse = new THREE.Vector2(0, 0);
+    var deltaTouch = new THREE.Vector2(0, 0);
     var mouseDown = false;
+    var touchDown = false;
     var theta = 0, phi = 0;
     var deltaTheta = 0, deltaPhi = 0;
     var target = new THREE.Vector3(0, 0, 0);
@@ -35,7 +38,8 @@ function Monitor(containerID, heart) {
     /* animationDamping MUST be a divisor of 1; i.e. 1 / animationDamping must equal a natural number
      * do NOT change tolerance, animationDamping and tolerance are co-dependent and chosen carefully
      */
-    var animationDamping = 0.1, rotateSpeed = 3, tolerance = 0.000001;
+    var animationDamping = 0.1, tolerance = 0.000001;
+    var rotateSpeed = {mouse: 3, touch: 1};
 
     init();
 
@@ -77,6 +81,7 @@ function Monitor(containerID, heart) {
         parentCanvas = document.getElementById('parent-canvas');
 
         parentCanvas.addEventListener('mousedown', onMouseDown, false);
+        parentCanvas.addEventListener('touchstart', onTouchStart, false);
         parentCanvas.addEventListener('wheel', onWheel, false);
         container.addEventListener('mousemove', raycasting, false);
         window.addEventListener('resize', onWindowResize, false);
@@ -140,6 +145,19 @@ function Monitor(containerID, heart) {
         mouse.y = event.clientY;
     }
 
+    function onTouchStart(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        touchDown = true;
+
+        parentCanvas.addEventListener('touchmove', onTouchMove, false);
+        parentCanvas.addEventListener('touchend', onTouchEnd, false);
+        parentCanvas.addEventListener('touchcancel', onTouchCancel, false);
+
+        touch.x = event.touches[0].clientX;
+        touch.y = event.touches[0].clientY;
+    }
+
     function onMouseMove(event) {
         if (mouseDown) {
             deltaMouse.x = event.clientX - mouse.x;
@@ -151,8 +169,27 @@ function Monitor(containerID, heart) {
             deltaTheta = deltaMouse.x / radius;
             deltaPhi = deltaMouse.y / radius;
 
-            theta -= deltaTheta * rotateSpeed;
-            phi += deltaPhi * rotateSpeed;
+            theta -= deltaTheta * rotateSpeed.mouse;
+            phi += deltaPhi * rotateSpeed.mouse;
+            phi = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, phi));
+        }
+    }
+
+    function onTouchMove(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (touchDown) {
+            deltaTouch.x = event.touches[0].clientX - touch.x;
+            deltaTouch.y = event.touches[0].clientY - touch.y;
+
+            touch.x = event.touches[0].clientX;
+            touch.y = event.touches[0].clientY;
+
+            deltaTheta = deltaTouch.x / radius;
+            deltaPhi = deltaTouch.y / radius;
+
+            theta -= deltaTheta * rotateSpeed.touch;
+            phi += deltaPhi * rotateSpeed.touch;
             phi = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, phi));
         }
     }
@@ -171,19 +208,36 @@ function Monitor(containerID, heart) {
         disposeListeners(event);
     }
 
+    function onTouchEnd(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        disposeListeners(event);
+    }
+
     function onMouseOut() {
+        disposeListeners();
+        $(labelDiv).hide();
+    }
+
+    function onTouchCancel() {
+        event.preventDefault();
+        event.stopPropagation();
         disposeListeners();
         $(labelDiv).hide();
     }
 
     function disposeListeners() {
         mouseDown = false;
+        touchDown = false;
         deltaTheta = 0;
         deltaPhi = 0;
 
         parentCanvas.removeEventListener('mousemove', onMouseMove, false);
         parentCanvas.removeEventListener('mouseup', onMouseUp, false);
         parentCanvas.removeEventListener('mouseout', onMouseOut, false);
+        parentCanvas.removeEventListener('touchmove', onTouchMove, false);
+        parentCanvas.removeEventListener('touchEnd', onTouchEnd, false);
+        parentCanvas.removeEventListener('touchCancel', onTouchCancel, false);
     }
 
     this.toggleGrid = function () {
@@ -316,7 +370,7 @@ function Monitor(containerID, heart) {
     }
 
     function updateCamera() {
-        if (mouseDown || resetThetaFlag || resetPhiFlag || resetFovFlag) {
+        if (mouseDown || resetThetaFlag || resetPhiFlag || resetFovFlag || touchDown) {
             phi = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, phi));
 
             camera.position.x = radius * Math.cos(phi) * Math.sin(theta);
