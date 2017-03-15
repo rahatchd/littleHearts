@@ -19,7 +19,7 @@ function Monitor(containerID, heart) {
     var deltaTouch = new THREE.Vector2(0, 0);
     var mouseDown = false;
     var touchDown = false;
-    var touchPinch = false;
+    var pinch = {shrink: false, yes: false};
     var deltaPinch = new THREE.Vector2(0, 0);
     var theta = 0, phi = 0;
     var deltaTheta = 0, deltaPhi = 0;
@@ -147,17 +147,32 @@ function Monitor(containerID, heart) {
         mouse.y = event.clientY;
     }
 
+    function pinchLength(e) {
+        var x = e.touches[0].clientX;
+        var y = e.touches[0]. clientY;
+        return Math.sqrt(x*x + y*y);
+    }
+
     function onTouchStart(event) {
         event.preventDefault();
         event.stopPropagation();
         console.log(event.touches.length);
 
         if (event.touches.length > 1) {
-            touchPinch = true;
+            if (deltaPinch.length() > pinchLength(event)) {
+                pinch.shrink = true;
+                pinch.yes = true;
+            }
+            else {
+                pinch.shrink = false;
+                pinch.yes = true;
+            }
             deltaPinch.x = Math.abs(event.touches[1].clientX - event.touches[0].clientX);
             deltaPinch.y = Math.abs(event.touches[1].clientY - event.touches[0].clientY);
         }
         else {
+            pinch.shrink = false;
+            pinch.yes = false;
             touchDown = true;
             touch.x = event.touches[0].clientX;
             touch.y = event.touches[0].clientY;
@@ -189,12 +204,12 @@ function Monitor(containerID, heart) {
         event.preventDefault();
         event.stopPropagation();
 
-        if (touchPinch || event.touches.length > 1) {
+        if (pinch.yes || event.touches.length > 1) {
             deltaPinch.x = Math.abs(event.touches[1].clientX - event.touches[0].clientX);
             deltaPinch.y = Math.abs(event.touches[1].clientY - event.touches[0].clientY);
 
-            fov += deltaPinch.length();
-            console.log(deltaPinch.length());
+            fov += pinch.shrink ? -deltaPinch.length() : deltaPinch.length();
+            console.log(fov);
             fov = Math.max(minFov, Math.min(maxFov, fov));
             camera.fov = fov;
             camera.updateProjectionMatrix();
