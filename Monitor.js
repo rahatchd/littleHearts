@@ -198,11 +198,9 @@ function Monitor(containerID, heart) {
 
         if (pinch || event.touches.length > 1) {
             deltaPinch = calcPinchLength(event) - pinchLength;
-            console.log("deltapinch: " + deltaPinch + ", pinchLength: " + pinchLength);
 
             fov += deltaPinch;
             fov = Math.max(minFov, Math.min(maxFov, fov));
-            console.log("fov: " + fov);
             camera.fov = fov;
             camera.updateProjectionMatrix();
             pinchLength = calcPinchLength(event);
